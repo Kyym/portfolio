@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kevin Kimani Mwaura | Full Stack Developer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --card: #151d2e;
+      --border: #1e2d45;
+      --accent: #00d4ff;
+      --accent2: #7c3aed;
+      --accent3: #10b981;
+      --text: #e8edf5;
+      --muted: #6b7a99;
+      --heading: 'Syne', sans-serif;
+      --body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10,14,26,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--heading);
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    .orb1 { width: 600px; height: 600px; background: rgba(0,212,255,0.08); top: -100px; right: -200px; }
+    .orb2 { width: 400px; height: 400px; background: rgba(124,58,237,0.1); bottom: -100px; left: -100px; }
+
+    .hero-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent3);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    h1 {
+      font-family: var(--heading);
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    h1 .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 580px;
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+      animation: fadeUp 0.6s 0.2s ease both;
+      font-weight: 300;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.8rem;
+      border-radius: 8px;
+      font-family: var(--body);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      color: #000;
+      font-weight: 600;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.5rem;
+      margin-top: 4rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .stat-num {
+      font-family: var(--heading);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 6rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-inner { max-width: 960px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-family: var(--heading);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin-bottom: 3.5rem;
+      font-weight: 300;
+    }
+
+    /* ── SKILLS ── */
+    #skills { background: var(--surface); }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .skill-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .skill-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+
+    .skill-card-icon {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .skill-card h3 {
+      font-family: var(--heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ── EXPERIENCE ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 2rem;
+      padding: 2.5rem 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .timeline-item:last-child { border-bottom: none; }
+
+    .timeline-date {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+      padding-top: 0.2rem;
+      text-align: right;
+    }
+
+    .timeline-content {}
+    .timeline-role {
+      font-family: var(--heading);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+    .timeline-company {
+      font-size: 0.88rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .timeline-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .timeline-list li {
+      font-size: 0.88rem;
+      color: var(--muted);
+      padding-left: 1rem;
+      position: relative;
+      font-weight: 300;
+    }
+    .timeline-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent3);
+      font-size: 0.75rem;
+    }
+
+    /* ── PROJECTS ── */
+    #projects { background: var(--surface); }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .project-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+    .project-card:hover::before { opacity: 1; }
+
+    .project-num {
+      font-family: var(--heading);
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+    .project-title {
+      font-family: var(--heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .project-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+    .project-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-top: 1.25rem;
+    }
+    .project-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+    .tag-blue { background: rgba(0,212,255,0.1); color: var(--accent); }
+    .tag-purple { background: rgba(124,58,237,0.1); color: #a78bfa; }
+    .tag-green { background: rgba(16,185,129,0.1); color: var(--accent3); }
+
+    /* ── CERTIFICATIONS ── */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .cert-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.9rem;
+      padding: 1.1rem 1.3rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 400;
+      transition: border-color 0.2s;
+    }
+    .cert-item:hover { border-color: var(--accent3); }
+    .cert-icon { font-size: 1.1rem; margin-top: 0.1rem; flex-shrink: 0; }
+
+    /* ── CONTACT ── */
+    #contact {
+      text-align: center;
+      background: var(--surface);
+    }
+    .contact-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      padding: 0.6rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .contact-link:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav .nav-links { display: none; }
+      .timeline-item { grid-template-columns: 1fr; gap: 0.5rem; }
+      .timeline-date { text-align: left; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">KKM</div>
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-orb orb1"></div>
+  <div class="hero-bg-orb orb2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Available for Remote Work
+    </div>
+    <h1>
+      Full Stack<br>
+      <span class="line2">Developer.</span>
+    </h1>
+    <p class="hero-desc">
+      I build scalable web applications, ERP systems, and AI-powered tools.
+      3+ years delivering full-cycle software — from clean front-ends to robust back-end APIs and generative AI integrations.
+    </p>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn btn-primary">View My Work ↓</a>
+      <a href="#contact" class="btn btn-outline">Get In Touch</a>
+      <a href="https://github.com/Kyym" target="_blank" class="btn btn-outline">GitHub ↗</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Years Experience</div>
+      </div>
+      <div>
+        <div class="stat-num">30%</div>
+        <div class="stat-label">Reporting Time Saved</div>
+      </div>
+      <div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">Major Projects</div>
+      </div>
+      <div>
+        <div class="stat-num">8+</div>
+        <div class="stat-label">Certifications</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-inner">
+    <div class="section-label">What I Work With</div>
+    <h2>Technical Skills</h2>
+    <p class="section-sub">A full-spectrum toolkit — from front-end interfaces to AI integrations and database architecture.</p>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-card-icon" style="background:rgba(0,212,255,0.1)">🖥️</div>
+        <h3>Languages & Frameworks</h3>
+        <div class="skill-tags">
+          <span class="tag">Java</span><span class="tag">Python</span><span class="tag">JavaScript</span>
+          <span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">Flask</span><span class="tag">Swift</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-icon" style="background:rgba(124,58,237,0.1)">🤖</div>
+        <h3>AI & Machine Learning</h3>
+        <div class="skill-tags">
+          <span class="tag">LangChain</span><span class="tag">Google Generative AI</span>
+          <span class="tag">NLP</span><span class="tag">LLM Prompt Engineering</span><span class="tag">Chatbot Dev</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-icon" style="background:rgba(16,185,129,0.1)">⚙️</div>
+        <h3>Backend & APIs</h3>
+        <div class="skill-tags">
+          <span class="tag">RESTful APIs</span><span class="tag">Spring Boot</span>
+          <span class="tag">Swagger</span><span class="tag">Gradle</span><span class="tag">Microservices</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-icon" style="background:rgba(251,191,36,0.1)">🗄️</div>
+        <h3>Databases</h3>
+        <div class="skill-tags">
+          <span class="tag">SQL Server</span><span class="tag">Oracle</span>
+          <span class="tag">MariaDB</span><span class="tag">SQL</span><span class="tag">Hive</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-icon" style="background:rgba(239,68,68,0.1)">🐳</div>
+        <h3>DevOps & Tools</h3>
+        <div class="skill-tags">
+          <span class="tag">Docker</span><span class="tag">Git</span><span class="tag">GitHub</span>
+          <span class="tag">IntelliJ IDEA</span><span class="tag">VS Code</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-card-icon" style="background:rgba(0,212,255,0.07)">📊</div>
+        <h3>ERP & Finance</h3>
+        <div class="skill-tags">
+          <span class="tag">ERP Systems</span><span class="tag">Financial Reporting</span>
+          <span class="tag">Audit Tools</span><span class="tag">Absa Bank</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-inner">
+    <div class="section-label">Career Path</div>
+    <h2>Experience</h2>
+    <p class="section-sub">From financial services to enterprise software and AI-powered development.</p>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-date">Jan 2024<br>— Present</div>
+        <div class="timeline-content">
+          <div class="timeline-role">Software Developer</div>
+          <div class="timeline-company">E&M Technology House Ltd · Nairobi, Kenya</div>
+          <ul class="timeline-list">
+            <li>Built responsive web applications using Java, HTML5, CSS3, and JavaScript</li>
+            <li>Designed an ERP & Financial Reporting System that cut reporting time by 30%</li>
+            <li>Architected RESTful APIs enabling seamless front-to-back-end communication</li>
+            <li>Developed an AI chatbot for PDF querying using LangChain & Google Generative AI</li>
+            <li>Contributed to Absa Financial Reporting platform — accurate, audit-ready output</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-date">2021 — 2023</div>
+        <div class="timeline-content">
+          <div class="timeline-role">Cash Relationship Officer</div>
+          <div class="timeline-company">Equity Bank Kenya · Nairobi, Kenya</div>
+          <ul class="timeline-list">
+            <li>Managed high-volume transactions: deposits, Swift, RTGS, Forex, M-Pesa</li>
+            <li>Built and expanded client relationships using deep banking product knowledge</li>
+            <li>Coordinated reports, presentations and operational workflows for management</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-date">2020 — 2021</div>
+        <div class="timeline-content">
+          <div class="timeline-role">Loan Sales Agent</div>
+          <div class="timeline-company">Platinum Credit Kenya · Nairobi, Kenya</div>
+          <ul class="timeline-list">
+            <li>Converted sales leads into new loan agreements across multiple product lines</li>
+            <li>Expanded civil servant client base via consultative door-to-door sales</li>
+            <li>Produced industry research reports to inform business strategy</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-inner">
+    <div class="section-label">What I've Built</div>
+    <h2>Key Projects</h2>
+    <p class="section-sub">Real-world solutions built with modern technologies — enterprise, AI, and financial systems.</p>
+    <div class="projects-grid">
+
+      <div class="project-card">
+        <div class="project-num">01</div>
+        <div class="project-title">AI PDF Chatbot Interface</div>
+        <p class="project-desc">A generative AI chatbot that processes and queries PDF documents using LangChain and the Google Generative AI API, with a custom fallback system for robust query handling and NLP-driven responses.</p>
+        <div class="project-tags">
+          <span class="project-tag tag-blue">LangChain</span>
+          <span class="project-tag tag-purple">Google AI API</span>
+          <span class="project-tag tag-green">Python</span>
+          <span class="project-tag tag-blue">NLP</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-num">02</div>
+        <div class="project-title">ERP & Financial Reporting System</div>
+        <p class="project-desc">A full ERP system tailored for audit teams — reduced financial reporting time by 30% and significantly improved data accuracy and compliance readiness for enterprise clients.</p>
+        <div class="project-tags">
+          <span class="project-tag tag-blue">Java</span>
+          <span class="project-tag tag-green">SQL Server</span>
+          <span class="project-tag tag-purple">Spring Boot</span>
+          <span class="project-tag tag-blue">REST API</span>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-num">03</div>
+        <div class="project-title">Absa Financial Reporting Platform</div>
+        <p class="project-desc">Collaborative financial reporting platform built for Absa Bank Kenya — ensuring timely, accurate financial statement generation within an agile cross-functional development team.</p>
+        <div class="project-tags">
+          <span class="project-tag tag-green">JavaScript</span>
+          <span class="project-tag tag-purple">Oracle DB</span>
+          <span class="project-tag tag-blue">REST API</span>
+          <span class="project-tag tag-green">ERP</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-inner">
+    <div class="section-label">Credentials</div>
+    <h2>Certifications</h2>
+    <p class="section-sub">Continuous learning across cloud, AI, security, and core engineering.</p>
+    <div class="cert-grid">
+      <div class="cert-item"><span class="cert-icon">☁️</span> Google Cloud Certification</div>
+      <div class="cert-item"><span class="cert-icon">🤖</span> Generative AI: Intro to Large Language Models</div>
+      <div class="cert-item"><span class="cert-icon">✍️</span> Prompt Engineering for Generative AI (2023)</div>
+      <div class="cert-item"><span class="cert-icon">☕</span> Java Algorithms, Data Structures & Collections</div>
+      <div class="cert-item"><span class="cert-icon">📱</span> Swift: Delegations & Data Sources</div>
+      <div class="cert-item"><span class="cert-icon">🔐</span> Cyber Security Essentials</div>
+      <div class="cert-item"><span class="cert-icon">🧩</span> Java Essential Training: Objects & APIs</div>
+      <div class="cert-item"><span class="cert-icon">🏅</span> Agape Leadership Training</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="contact-box">
+      <div class="section-label" style="text-align:center">Let's Connect</div>
+      <h2 style="text-align:center">Open to Remote Opportunities</h2>
+      <p style="color:var(--muted); font-size:0.95rem; margin-top:0.75rem; font-weight:300;">
+        I'm actively looking for mid-level Full Stack Developer roles worldwide. Let's build something great together.
+      </p>
+      <div class="contact-links">
+        <a href="mailto:kevinkimani165@gmail.com" class="contact-link">📧 kevinkimani165@gmail.com</a>
+        <a href="tel:+254727596922" class="contact-link">📞 +254 727 596 922</a>
+        <a href="https://www.linkedin.com/in/kevin-k-257b52171/" target="_blank" class="contact-link">💼 LinkedIn</a>
+        <a href="https://github.com/Kyym" target="_blank" class="contact-link">🐙 GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Kevin Kimani Mwaura · Full Stack Developer · Nairobi, Kenya</p>
+</footer>
+
+</body>
+</html>
