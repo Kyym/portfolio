@@ -1032,7 +1032,7 @@ if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.se
     <div class="booking-success" id="bookingSuccess">
       <span class="success-icon">🎉</span>
       <h3>Request Sent Successfully!</h3>
-      <p>Your meeting request has been sent to Kevin on WhatsApp.<br><br>
+      <p>Your meeting request has been <strong style="color:var(--green)">emailed to Kevin</strong> and sent via WhatsApp.<br><br>
       He will confirm and send a <strong style="color:var(--gold)">Google Meet link</strong> to <strong id="confirm-email" style="color:var(--cyan)"></strong> within <strong>24 hours</strong>.<br><br>
       You can also reach him directly at <strong style="color:var(--green)">+254 727 596 922</strong>.</p>
       <button onclick="closeModal()" class="btn btn-gold" style="margin-top:1.75rem;width:100%;justify-content:center">✓ Done</button>
@@ -1057,7 +1057,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (d) d.min = new Date().toISOString().split('T')[0];
 });
 // ── Submit booking ──
-function submitBooking() {
+async function submitBooking() {
   const name   = document.getElementById('b-name').value.trim();
   const email  = document.getElementById('b-email').value.trim();
   const date   = document.getElementById('b-date').value;
@@ -1070,7 +1070,39 @@ function submitBooking() {
   }
   const phone = document.getElementById('b-phone').value.trim();
   const notes = document.getElementById('b-notes').value.trim();
-  // Format the WhatsApp message to Kevin
+
+  // ── Show loading state ──
+  const btn = document.querySelector('.btn-submit');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '⏳ Sending...';
+  btn.disabled = true;
+
+  // ── Send email via Formspree (free, no signup needed) ──
+  try {
+    const res = await fetch('https://formspree.io/f/xeokvqnd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: `📅 Meeting Request from ${name} — ${reason}`,
+        _replyto: email,
+        Name: name,
+        Email: email,
+        Phone: phone || 'Not provided',
+        Date: date,
+        Time: time,
+        Timezone: tz,
+        Reason: reason,
+        Notes: notes || 'None',
+        _template: 'table'
+      })
+    });
+    if (!res.ok) throw new Error('Email failed');
+  } catch(e) {
+    console.warn('Email send issue:', e);
+    // Still proceed — WhatsApp is the backup
+  }
+
+  // ── Also open WhatsApp with pre-filled message ──
   const msg = encodeURIComponent(
     `📅 *New Meeting Request from Portfolio*\n\n` +
     `👤 *Name:* ${name}\n` +
@@ -1082,7 +1114,10 @@ function submitBooking() {
     (notes ? `📝 *Notes:* ${notes}` : '')
   );
   window.open('https://wa.me/254727596922?text=' + msg);
-  // Show success screen
+
+  // ── Restore button & show success ──
+  btn.innerHTML = origText;
+  btn.disabled = false;
   document.getElementById('confirm-email').textContent = email;
   document.getElementById('bookingForm').style.display = 'none';
   document.getElementById('bookingSuccess').style.display = 'block';
