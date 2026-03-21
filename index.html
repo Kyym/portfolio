@@ -457,6 +457,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2rem 2.5
 /* ═══ BOOK BUTTON ═══ */
 .btn-book-trigger{width:100%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;justify-content:center;font-size:0.88rem;padding:0.88rem 1.5rem;margin-top:1.5rem;box-shadow:0 4px 20px rgba(124,58,237,0.3)}
 .btn-book-trigger:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,0.45)}
+/* ── Live Calendar Icon ── */
+.live-cal-icon{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:2em;height:2em;background:#fff;border-radius:5px;overflow:hidden;vertical-align:middle;margin-right:0.3em;box-shadow:0 1px 4px rgba(0,0,0,0.25);flex-shrink:0;line-height:1}
+.live-cal-icon .cal-month{display:block;width:100%;background:#e63946;color:#fff;font-size:0.35em;font-weight:700;text-transform:uppercase;text-align:center;padding:0.15em 0;letter-spacing:0.05em}
+.live-cal-icon .cal-day{display:block;width:100%;color:#1a1a2e;font-size:0.72em;font-weight:800;text-align:center;padding:0.05em 0}
+.live-cal-lg{width:2.4em;height:2.4em}
+.live-cal-lg .cal-day{font-size:0.85em}
 
 /* ═══ MODAL ═══ */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);z-index:2000;align-items:center;justify-content:center;padding:1rem}
@@ -792,7 +798,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2rem 2.5
         <!-- BOOK A MEETING -->
         <button onclick="document.getElementById('bookingModal').classList.add('open')"
           class="btn btn-book-trigger">
-          📅 Book a Google Meet Session
+          <span class="live-cal-icon"><span class="cal-month" id="cal-month-btn"></span><span class="cal-day" id="cal-day-btn"></span></span> Book a Google Meet Session
         </button></a>
         </div>
       </div>
@@ -838,6 +844,19 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2rem 2.5
     });
     var link = document.getElementById('email-link-1');
     if (link) link.href = 'mailto:' + e;
+  })();
+
+  // Live calendar icon — shows real today's date
+  (function() {
+    var now = new Date();
+    var month = now.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    var day = now.getDate();
+    ['btn', 'modal'].forEach(function(suffix) {
+      var m = document.getElementById('cal-month-' + suffix);
+      var d = document.getElementById('cal-day-' + suffix);
+      if (m) m.textContent = month;
+      if (d) d.textContent = day;
+    });
   })();
 </script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -958,7 +977,7 @@ if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.se
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div id="bookingForm">
-      <div class="modal-title">📅 Book a Meeting with Kevin</div>
+      <div class="modal-title"><span class="live-cal-icon live-cal-lg"><span class="cal-month" id="cal-month-modal"></span><span class="cal-day" id="cal-day-modal"></span></span> Book a Meeting with Kevin</div>
       <p class="modal-sub">Schedule a Google Meet session. Fill in your details and Kevin will send you a confirmed meeting link within 24 hours.</p>
       <div class="form-row">
         <div class="form-group">
