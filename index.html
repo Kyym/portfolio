@@ -72,6 +72,20 @@ html[data-theme="dark"] .main .section:not(.hero){background-image:linear-gradie
 html[data-theme="light"] .theme-toggle{background:#ffffff;color:#0b1320;border-color:rgba(0,0,0,.1)}
 html[data-theme="light"] .theme-toggle:hover{background:var(--accent-color);color:#fff}
 @media (prefers-reduced-motion:reduce){#heroCanvas{display:none}}
+/* ===== Ambient motion ===== */
+#bgCanvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+.main,.footer{position:relative;z-index:1}
+.main .section:not(.hero){background-color:color-mix(in srgb,var(--background-color),transparent 40%)}
+html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear infinite}
+@keyframes gridPan{from{background-position:0 0,0 0}to{background-position:44px 44px,44px 44px}}
+.hero::after{content:"";position:absolute;inset:-20%;z-index:1;pointer-events:none;background:radial-gradient(circle at 30% 40%,rgba(20,157,221,.22),transparent 35%),radial-gradient(circle at 75% 65%,rgba(80,120,255,.16),transparent 35%);animation:orbDrift 18s ease-in-out infinite alternate}
+@keyframes orbDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(4%,-3%) scale(1.08)}100%{transform:translate(-3%,4%) scale(1)}}
+.hero .scanline{position:absolute;left:0;right:0;height:120px;z-index:2;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(20,157,221,.07),transparent);animation:scan 9s linear infinite}
+@keyframes scan{from{top:-120px}to{top:100%}}
+.header .profile-img img{animation:ringPulse 4s ease-in-out infinite}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(20,157,221,.0)}50%{box-shadow:0 0 0 6px rgba(20,157,221,.18)}}
+@media (prefers-reduced-motion:reduce){#bgCanvas,.hero .scanline{display:none}.hero::after{animation:none}}
+
 /* ===== Kevin customisations ===== */
 :root{--accent-color:#149ddd}
 .header .profile-img img{border:6px solid color-mix(in srgb,var(--default-color),transparent 85%);width:120px;height:120px;object-fit:cover}
@@ -172,6 +186,7 @@ html[data-theme="light"] .theme-toggle:hover{background:var(--accent-color);colo
     <!-- Hero -->
     <section id="hero" class="hero section dark-background">
       <canvas id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="scanline" aria-hidden="true"></div>
       <div class="container" data-aos="fade-up" data-aos-delay="100">
         <h2>Kevin Kimani Mwaura</h2>
         <p>I'm a <span class="typed" data-typed-items="Full Stack Developer, React &amp; Next.js Engineer, ERP &amp; Integrations Specialist, Mobile App Developer, AI Integration Engineer">Full Stack Developer</span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
@@ -890,55 +905,69 @@ html[data-theme="light"] .theme-toggle:hover{background:var(--accent-color);colo
 })();
 // ===== Card spotlight follows cursor =====
 document.querySelectorAll('.proj-card').forEach(function(c){c.addEventListener('mousemove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});});
-// ===== Subtle hero network animation =====
+// ===== Hero tech animation: network + data packets + cursor links + code rain =====
 (function(){
   var cv=document.getElementById('heroCanvas'); if(!cv) return;
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var ctx=cv.getContext('2d'), hero=cv.parentElement, W,H,dpr,nodes=[],running=true,raf;
-  var SYM=['</>','{ }','API','SQL','AI','=>'], syms=[];
+  var ctx=cv.getContext('2d'), hero=cv.parentElement, W,H,dpr,nodes=[],packets=[],syms=[],cols=[],running=true,raf,mouse={x:-999,y:-999};
+  var SYM=['</>','{ }','API','SQL','AI','=>','git','npm','()','[]','fn','JSON','HTTP','React','.NET','py'];
+  var LINK=130, LINK2=LINK*LINK;
   function size(){dpr=Math.min(window.devicePixelRatio||1,2);W=hero.clientWidth;H=hero.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
-    var n=Math.min(60,Math.round(W*H/22000));nodes=[];for(var i=0;i<n;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+.6});
-    syms=[];for(var j=0;j<8;j++)syms.push({x:Math.random()*W,y:Math.random()*H,v:Math.random()*.15+.05,t:SYM[j%SYM.length],a:Math.random()*.08+.04});}
-  function tick(){ctx.clearRect(0,0,W,H);
-    for(var i=0;i<nodes.length;i++){var a=nodes[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;
-      for(var j=i+1;j<nodes.length;j++){var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;if(d<14400){ctx.strokeStyle='rgba(20,157,221,'+(0.26*(1-d/14400))+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
-      ctx.fillStyle='rgba(120,200,240,.55)';ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,6.283);ctx.fill();}
-    ctx.font='600 13px Poppins, monospace';
-    syms.forEach(function(s){s.y-=s.v;if(s.y<-20){s.y=H+20;s.x=Math.random()*W;}ctx.fillStyle='rgba(20,157,221,'+s.a+')';ctx.fillText(s.t,s.x,s.y);});
+    var n=Math.min(95,Math.max(35,Math.round(W*H/14000)));nodes=[];
+    for(var i=0;i<n;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.45,vy:(Math.random()-.5)*.45,r:Math.random()*1.8+.8,p:Math.random()*6.28});
+    syms=[];for(var j=0;j<16;j++)syms.push({x:Math.random()*W,y:Math.random()*H,v:Math.random()*.35+.12,t:SYM[j%SYM.length],a:Math.random()*.12+.06,s:Math.random()*5+11});
+    cols=[];var cw=26;for(var c=0;c<Math.floor(W/cw);c++){if(Math.random()<.18)cols.push({x:c*cw+8,y:Math.random()*H,v:Math.random()*1.2+.6,len:Math.floor(Math.random()*10+6)});}
+    packets=[];}
+  function spawnPacket(){var i=Math.floor(Math.random()*nodes.length),a=nodes[i],best=null,bd=LINK2;
+    for(var j=0;j<nodes.length;j++){if(j===i)continue;var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;if(d<bd&&d>900){bd=d;best=b;}}
+    if(best)packets.push({a:a,b:best,t:0,v:Math.random()*.02+.012});}
+  var frame=0;
+  function tick(){frame++;ctx.clearRect(0,0,W,H);
+    // code rain columns (binary)
+    ctx.font='12px monospace';
+    cols.forEach(function(c){c.y+=c.v;if(c.y-c.len*14>H){c.y=-20;}
+      for(var k=0;k<c.len;k++){var yy=c.y-k*14;if(yy<0||yy>H)continue;ctx.fillStyle='rgba(20,157,221,'+(0.16*(1-k/c.len))+')';ctx.fillText(((c.x+k+frame/20|0)%2)?'1':'0',c.x,yy);}});
+    // nodes + links
+    for(var i=0;i<nodes.length;i++){var a=nodes[i];a.x+=a.vx;a.y+=a.vy;a.p+=.03;
+      if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;
+      var mdx=a.x-mouse.x,mdy=a.y-mouse.y,md=mdx*mdx+mdy*mdy;
+      if(md<22500){ctx.strokeStyle='rgba(120,210,255,'+(0.55*(1-md/22500))+')';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(mouse.x,mouse.y);ctx.stroke();a.x+=mdx*.004;a.y+=mdy*.004;}
+      for(var j=i+1;j<nodes.length;j++){var b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;
+        if(d<LINK2){ctx.strokeStyle='rgba(20,157,221,'+(0.34*(1-d/LINK2))+')';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+      var g=.55+.35*Math.sin(a.p);
+      ctx.fillStyle='rgba(140,215,250,'+g+')';ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,6.283);ctx.fill();
+      if(a.r>2.2){ctx.fillStyle='rgba(20,157,221,.12)';ctx.beginPath();ctx.arc(a.x,a.y,a.r*4,0,6.283);ctx.fill();}}
+    // data packets travelling along links
+    if(frame%18===0&&packets.length<14)spawnPacket();
+    for(var p=packets.length-1;p>=0;p--){var k=packets[p];k.t+=k.v;if(k.t>=1){packets.splice(p,1);continue;}
+      var x=k.a.x+(k.b.x-k.a.x)*k.t,y=k.a.y+(k.b.y-k.a.y)*k.t;
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(x,y,1.8,0,6.283);ctx.fill();
+      ctx.fillStyle='rgba(20,157,221,.35)';ctx.beginPath();ctx.arc(x,y,5,0,6.283);ctx.fill();}
+    // floating code symbols
+    syms.forEach(function(s){s.y-=s.v;if(s.y<-20){s.y=H+20;s.x=Math.random()*W;}ctx.font='600 '+s.s+'px Poppins, monospace';ctx.fillStyle='rgba(120,200,240,'+s.a+')';ctx.fillText(s.t,s.x,s.y);});
     if(running) raf=requestAnimationFrame(tick);}
   size(); tick();
-  window.addEventListener('resize',function(){size();});
+  window.addEventListener('resize',size);
+  hero.addEventListener('mousemove',function(e){var r=hero.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;});
+  hero.addEventListener('mouseleave',function(){mouse.x=-999;mouse.y=-999;});
   new IntersectionObserver(function(en){var vis=en[0].isIntersecting;if(vis&&!running){running=true;tick();}else if(!vis){running=false;cancelAnimationFrame(raf);}}).observe(hero);
   document.addEventListener('visibilitychange',function(){if(document.hidden){running=false;cancelAnimationFrame(raf);}else if(!running){running=true;tick();}});
 })();
-// ===== Contact / meeting form (Formspree + WhatsApp) =====
+// ===== Page-wide ambient particles (fixed, very light) =====
 (function(){
-  const form=document.getElementById('contactForm'); if(!form) return;
-  const status=document.getElementById('formStatus');
-  const d=document.getElementById('c-date'); if(d) d.min=new Date().toISOString().split('T')[0];
-  form.addEventListener('submit',async e=>{
-    e.preventDefault();
-    const v=id=>document.getElementById(id).value.trim();
-    const data={Name:v('c-name'),Email:v('c-email'),Reason:v('c-reason'),Message:v('c-message'),
-      'Preferred meeting date':v('c-date')||'Not requested','Preferred time':v('c-time')||'-',
-      _replyto:v('c-email'),_subject:`Portfolio: ${v('c-reason')} — ${v('c-name')}`};
-    const btn=form.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='Sending...';
-    status.className='form-status';
-    try{
-      const r=await fetch('https://formspree.io/f/xqeyjwpz',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)});
-      if(!r.ok) throw new Error('send failed');
-      status.textContent='Thanks '+data.Name+'! Your message has been sent. Kevin will reply to '+data.Email+' within 24 hours.';
-      status.className='form-status ok'; form.reset();
-    }catch(err){
-      status.innerHTML='Sorry, the message could not be sent. Please email <a href="mailto:kevinkimani165@gmail.com">kevinkimani165@gmail.com</a> or use WhatsApp.';
-      status.className='form-status err';
-    }
-    btn.disabled=false; btn.textContent='Send Message';
-  });
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var cv=document.createElement('canvas');cv.id='bgCanvas';cv.setAttribute('aria-hidden','true');document.body.prepend(cv);
+  var ctx=cv.getContext('2d'),W,H,pts=[],running=true,raf;
+  function size(){var d=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    pts=[];var n=Math.min(45,Math.round(W*H/30000));for(var i=0;i<n;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25});}
+  function tick(){ctx.clearRect(0,0,W,H);var dark=document.documentElement.getAttribute('data-theme')==='dark',c=dark?'20,157,221':'20,120,190';
+    for(var i=0;i<pts.length;i++){var a=pts[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;
+      for(var j=i+1;j<pts.length;j++){var b=pts[j],dx=a.x-b.x,dy=a.y-b.y,dd=dx*dx+dy*dy;if(dd<16900){ctx.strokeStyle='rgba('+c+','+((dark?.16:.12)*(1-dd/16900))+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+      ctx.fillStyle='rgba('+c+','+(dark?.45:.35)+')';ctx.beginPath();ctx.arc(a.x,a.y,1.3,0,6.283);ctx.fill();}
+    if(running) raf=requestAnimationFrame(tick);}
+  size();tick();addEventListener('resize',size);
+  document.addEventListener('visibilitychange',function(){if(document.hidden){running=false;cancelAnimationFrame(raf);}else if(!running){running=true;tick();}});
 })();
-// re-run AOS after isotope filtering so hidden cards animate
-document.querySelectorAll('.isotope-filters li').forEach(li=>li.setAttribute('tabindex','0'));
-document.querySelectorAll('.isotope-filters li').forEach(li=>li.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();li.click();}}));
 
   </script>
 </body>
