@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Visitor Logs · kevin-codes</title>
+<style>
+:root{--bg:#0b1320;--card:#121d2e;--line:rgba(255,255,255,.08);--text:#dbe4ef;--muted:#8a9bb2;--accent:#149ddd}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1300px;margin:0 auto;padding:24px 16px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card b{display:block;font-size:24px;color:#fff}.card span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+input[type=text],input[type=password]{background:#0e1828;border:1px solid var(--line);color:var(--text);padding:9px 12px;border-radius:8px;min-width:240px}
+button{background:var(--accent);color:#fff;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:600}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}button.danger{background:#b3261e}
+label{color:var(--muted);display:flex;gap:6px;align-items:center}
+.tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:1050px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:#15223a;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:hover td{background:rgba(20,157,221,.06)}td.mono{font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;background:rgba(20,157,221,.15);color:#7fcdf2}
+.pill.bot{background:rgba(255,160,0,.15);color:#ffc76b}
+.ua{color:var(--muted);font-size:12px;max-width:260px;word-break:break-word}
+#login{max-width:420px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
+#login p{color:var(--muted)}.err{color:#ff8a80;margin-top:10px;min-height:1.2em}
+.hidden{display:none}.top{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div id="login">
+  <h1>Visitor Logs</h1>
+  <p>Enter your admin key (the <code>ADMIN_KEY</code> you set in Vercel).</p>
+  <input type="password" id="key" placeholder="Admin key" style="width:100%" autocomplete="current-password">
+  <div style="margin-top:12px"><button id="go">View logs</button></div>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<div class="wrap hidden" id="app">
+  <h1>Visitor Logs</h1>
+  <p class="sub">Every visit to kevin-codes.vercel.app (latest 5,000, kept up to 90 days). Times shown in your local time.</p>
+  <div class="cards">
+    <div class="card"><span>Visits</span><b id="cVisits">0</b></div>
+    <div class="card"><span>Unique IPs</span><b id="cIps">0</b></div>
+    <div class="card"><span>Mobile</span><b id="cMobile">0%</b></div>
+    <div class="card"><span>Last 24 hours</span><b id="c24">0</b></div>
+    <div class="card"><span>Top countries</span><div class="top" id="cCountries">–</div></div>
+    <div class="card"><span>Top sources</span><div class="top" id="cRefs">–</div></div>
+  </div>
+  <div class="bar">
+    <input type="text" id="q" placeholder="Search IP, city, device, source, tag…">
+    <label><input type="checkbox" id="hideBots" checked> Hide bots</label>
+    <button class="ghost" id="refresh">Refresh</button>
+    <button class="ghost" id="csv">Export CSV</button>
+    <button class="ghost" id="logout">Lock</button>
+    <button class="danger" id="clear">Clear all logs</button>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Time</th><th>IP address</th><th>Location</th><th>Device</th><th>Browser / OS</th><th>Source</th><th>Tag</th><th>Page</th><th>Screen · Lang · TZ</th><th>User agent</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+</div>
+
+<script>
+(function(){
+  var KEY_STORE='kc_admin_key', data=[];
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function host(r){try{return r?new URL(r).hostname.replace(/^www\./,''):'Direct';}catch(e){return r||'Direct';}}
+  function top(arr,n){var m={};arr.forEach(function(x){m[x]=(m[x]||0)+1;});return Object.keys(m).sort(function(a,b){return m[b]-m[a];}).slice(0,n).map(function(k){return esc(k)+' ('+m[k]+')';}).join('<br>')||'–';}
+  async function load(){
+    var key=sessionStorage.getItem(KEY_STORE); if(!key) return showLogin();
+    var r=await fetch('/api/visits',{headers:{'x-admin-key':key}});
+    if(r.status===401){sessionStorage.removeItem(KEY_STORE);return showLogin('Wrong admin key.');}
+    if(r.status===503){return showLogin('Storage is not connected yet — connect Upstash Redis to this project in Vercel.');}
+    if(!r.ok){return showLogin('Error '+r.status);}
+    data=(await r.json()).visits||[]; $('login').classList.add('hidden'); $('app').classList.remove('hidden'); render();
+  }
+  function showLogin(msg){$('app').classList.add('hidden');$('login').classList.remove('hidden');$('loginErr').textContent=msg||'';}
+  function filtered(){
+    var q=$('q').value.toLowerCase(), hb=$('hideBots').checked;
+    return data.filter(function(v){ if(hb&&v.bot) return false; if(!q) return true;
+      return [v.ip,v.city,v.region,v.country,v.device,v.browser,v.os,v.ref,v.tag,v.page,v.ua].join(' ').toLowerCase().indexOf(q)>-1;});
+  }
+  function render(){
+    var list=filtered(), day=Date.now()-864e5;
+    $('cVisits').textContent=list.length;
+    $('cIps').textContent=new Set(list.map(function(v){return v.ip;})).size;
+    $('cMobile').textContent=list.length?Math.round(100*list.filter(function(v){return v.device!=='Desktop';}).length/list.length)+'%':'0%';
+    $('c24').textContent=list.filter(function(v){return v.t>=day;}).length;
+    $('cCountries').innerHTML=top(list.map(function(v){return v.country||'Unknown';}),4);
+    $('cRefs').innerHTML=top(list.map(function(v){return host(v.ref);}),4);
+    $('rows').innerHTML=list.map(function(v){
+      return '<tr><td>'+esc(new Date(v.t).toLocaleString())+'</td><td class="mono">'+esc(v.ip)+'</td><td>'+esc([v.city,v.region,v.country].filter(Boolean).join(', '))+'</td>'
+      +'<td><span class="pill'+(v.bot?' bot':'')+'">'+esc(v.bot?'Bot':v.device)+'</span></td><td>'+esc(v.browser+' · '+v.os)+'</td>'
+      +'<td>'+esc(host(v.ref))+'</td><td>'+esc(v.tag)+'</td><td>'+esc(v.page)+'</td><td class="mono">'+esc([v.screen,v.lang,v.tz].filter(Boolean).join(' · '))+'</td><td class="ua">'+esc(v.ua)+'</td></tr>';
+    }).join('')||'<tr><td colspan="10" style="color:var(--muted)">No visits yet.</td></tr>';
+  }
+  function csv(){
+    var cols=['time','ip','city','region','country','device','browser','os','bot','source','tag','page','screen','lang','tz','user_agent'];
+    var lines=[cols.join(',')].concat(filtered().map(function(v){
+      return [new Date(v.t).toISOString(),v.ip,v.city,v.region,v.country,v.device,v.browser,v.os,v.bot,v.ref,v.tag,v.page,v.screen,v.lang,v.tz,v.ua]
+        .map(function(x){return '"'+String(x==null?'':x).replace(/"/g,'""')+'"';}).join(',');}));
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='visitor-logs.csv';a.click();
+  }
+  $('go').onclick=function(){var k=$('key').value.trim();if(!k)return;sessionStorage.setItem(KEY_STORE,k);load();};
+  $('key').addEventListener('keydown',function(e){if(e.key==='Enter')$('go').click();});
+  $('q').oninput=render;$('hideBots').onchange=render;$('refresh').onclick=load;$('csv').onclick=csv;
+  $('logout').onclick=function(){sessionStorage.removeItem(KEY_STORE);data=[];showLogin();};
+  $('clear').onclick=async function(){if(!confirm('Permanently delete ALL visitor logs?'))return;
+    var r=await fetch('/api/visits',{method:'DELETE',headers:{'x-admin-key':sessionStorage.getItem(KEY_STORE)}});if(r.ok){data=[];render();}};
+  load();
+})();
+</script>
+</body>
+</html>
