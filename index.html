@@ -84,6 +84,8 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
 @keyframes scan{from{top:-120px}to{top:100%}}
 .header .profile-img img{animation:ringPulse 4s ease-in-out infinite}
 @keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(20,157,221,.0)}50%{box-shadow:0 0 0 6px rgba(20,157,221,.18)}}
+
+.privacy-note{max-width:760px;margin:14px auto 0;text-align:center;font-size:12px;color:color-mix(in srgb,var(--default-color),transparent 40%)}
 @media (prefers-reduced-motion:reduce){#bgCanvas,.hero .scanline{display:none}.hero::after{animation:none}}
 
 /* ===== Kevin customisations ===== */
@@ -687,6 +689,7 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
         <!-- All the links in the footer should remain intact (BootstrapMade free licence). -->
         Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a>
       </div>
+      <p class="privacy-note" id="privacy"><i class="bi bi-shield-lock"></i> Privacy: this site records each visit's IP address, approximate location (city/country), device, browser and referring site to understand who views the portfolio. Records are kept for up to 90 days and are not shared or sold. To have your data removed, email <a href="mailto:kevinkimani165@gmail.com">kevinkimani165@gmail.com</a>.</p>
     </div>
   </footer>
 
@@ -890,6 +893,18 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
 
 })();
 
+
+// ===== Visit logging (see Privacy note in footer) =====
+(function(){
+  try{
+    if(location.hostname==='localhost'||location.protocol==='file:') return;
+    if(sessionStorage.getItem('kc_logged')) return; sessionStorage.setItem('kc_logged','1');
+    var p=new URLSearchParams(location.search);
+    var body=JSON.stringify({page:location.pathname+location.hash,ref:document.referrer||'',tag:p.get('ref')||p.get('utm_source')||'',
+      screen:screen.width+'x'+screen.height,lang:navigator.language||'',tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||'')});
+    fetch('/api/visit',{method:'POST',headers:{'Content-Type':'application/json'},body:body,keepalive:true}).catch(function(){});
+  }catch(e){}
+})();
 
 // ===== Photo reuse =====
 (function(){var p=document.getElementById('photoMain');document.querySelectorAll('img[data-photo]').forEach(function(i){i.src=p.src;});})();
