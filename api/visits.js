@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
   try {
     if (req.method === 'DELETE') { await pipeline([['DEL', 'visits']]); return res.status(200).json({ ok: true }); }
     if (req.method !== 'GET') return res.status(405).end();
-    const [items] = await pipeline([['LRANGE', 'visits', 0, 4999]]);
+    const [items] = await pipeline([['LRANGE', 'visits', 0, 19999]]);
     const cutoff = Date.now() - 90 * 24 * 3600 * 1000;
     const visits = (items || []).map(s => { try { return JSON.parse(s); } catch (e) { return null; } }).filter(v => v && v.t >= cutoff);
     return res.status(200).json({ count: visits.length, visits });
