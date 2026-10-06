@@ -1,5 +1,6 @@
 // POST /api/visit  — records a page view, a click, or a section view
 const { pipeline } = require('./_redis');
+const notify = require('./_notify');
 const KEY = 'visits';
 const MAX = 20000;                     // keep at most 20,000 events
 const MAX_AGE = 90 * 24 * 3600 * 1000; // and nothing older than 90 days
@@ -50,6 +51,7 @@ module.exports = async (req, res) => {
     ]);
     // gradual clean-up of records older than 90 days
     try { const oldest = JSON.parse(out[2] || 'null'); if (oldest && Date.now() - oldest.t > MAX_AGE) await pipeline([['RPOP', KEY, 20]]); } catch (e) {}
+    await notify(rec);
     return res.status(204).end();
   } catch (e) {
     return res.status(e.message === 'storage-not-configured' ? 503 : 500).json({ error: e.message });
