@@ -28,6 +28,14 @@ tr:hover td{background:rgba(20,157,221,.06)}td.mono{font-family:ui-monospace,Con
 #login{max-width:420px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
 #login p{color:var(--muted)}.err{color:#ff8a80;margin-top:10px;min-height:1.2em}
 .hidden{display:none}.top{color:var(--muted);font-size:13px}
+tr.sess{cursor:pointer}tr.sess td:first-child:before{content:"\25B8  ";color:var(--accent)}tr.sess.open td:first-child:before{content:"\25BE  "}
+tr.detail td{background:#0e1828;padding:12px 18px}
+.tl{list-style:none;margin:0;padding:0;border-left:2px solid rgba(20,157,221,.4)}
+.tl li{position:relative;padding:3px 0 3px 16px;font-size:13px}
+.tl li:before{content:"";position:absolute;left:-6px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--accent)}
+.tl li.click:before{background:var(--accent)}.tl .tm{color:var(--muted);font-family:ui-monospace,Consolas,monospace;font-size:12px;margin-right:8px}
+.tl .hrefc{color:var(--muted);font-size:12px;word-break:break-all}
+.act{font-size:12px;color:var(--muted)}.act b{color:#7fcdf2;font-weight:600}
 </style>
 </head>
 <body>
@@ -41,17 +49,19 @@ tr:hover td{background:rgba(20,157,221,.06)}td.mono{font-family:ui-monospace,Con
 
 <div class="wrap hidden" id="app">
   <h1>Visitor Logs</h1>
-  <p class="sub">Every visit to kevin-codes.vercel.app (latest 5,000, kept up to 90 days). Times shown in your local time.</p>
+  <p class="sub">Every visitor to kevin-codes.vercel.app with what they viewed and clicked (latest 20,000 events, kept up to 90 days). Click a row to see the visitor's journey. Times are in your local time.</p>
   <div class="cards">
-    <div class="card"><span>Visits</span><b id="cVisits">0</b></div>
+    <div class="card"><span>Visitors (sessions)</span><b id="cVisits">0</b></div>
     <div class="card"><span>Unique IPs</span><b id="cIps">0</b></div>
     <div class="card"><span>Mobile</span><b id="cMobile">0%</b></div>
     <div class="card"><span>Last 24 hours</span><b id="c24">0</b></div>
     <div class="card"><span>Top countries</span><div class="top" id="cCountries">–</div></div>
     <div class="card"><span>Top sources</span><div class="top" id="cRefs">–</div></div>
+    <div class="card"><span>Most clicked</span><div class="top" id="cClicks">–</div></div>
+    <div class="card"><span>Sections reached</span><div class="top" id="cSecs">–</div></div>
   </div>
   <div class="bar">
-    <input type="text" id="q" placeholder="Search IP, city, device, source, tag…">
+    <input type="text" id="q" placeholder="Search IP, city, device, source, tag, click…">
     <label><input type="checkbox" id="hideBots" checked> Hide bots</label>
     <button class="ghost" id="refresh">Refresh</button>
     <button class="ghost" id="csv">Export CSV</button>
@@ -59,7 +69,7 @@ tr:hover td{background:rgba(20,157,221,.06)}td.mono{font-family:ui-monospace,Con
     <button class="danger" id="clear">Clear all logs</button>
   </div>
   <div class="tablewrap"><table>
-    <thead><tr><th>Time</th><th>IP address</th><th>Location</th><th>Device</th><th>Browser / OS</th><th>Source</th><th>Tag</th><th>Page</th><th>Screen · Lang · TZ</th><th>User agent</th></tr></thead>
+    <thead><tr><th>First seen</th><th>IP address</th><th>Location</th><th>Device</th><th>Browser / OS</th><th>Source</th><th>Tag</th><th>Activity</th><th>Screen · Lang · TZ</th><th>User agent</th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
 </div>
@@ -80,29 +90,56 @@ tr:hover td{background:rgba(20,157,221,.06)}td.mono{font-family:ui-monospace,Con
     data=(await r.json()).visits||[]; $('login').classList.add('hidden'); $('app').classList.remove('hidden'); render();
   }
   function showLogin(msg){$('app').classList.add('hidden');$('login').classList.remove('hidden');$('loginErr').textContent=msg||'';}
+  function sessions(){
+    var m={},order=[];
+    data.slice().sort(function(a,b){return a.t-b.t;}).forEach(function(v,i){
+      var k=v.sid||('solo-'+v.t+'-'+i);
+      if(!m[k]){m[k]={id:k,first:v,events:[]};order.push(k);}
+      m[k].events.push(v);
+      if((v.type||'view')==='view'&&m[k].first.type&&m[k].first.type!=='view') m[k].first=v;
+    });
+    return order.map(function(k){var s=m[k];s.start=s.events[0].t;s.clicks=s.events.filter(function(e){return e.type==='click';});
+      s.secs=s.events.filter(function(e){return e.type==='section';});return s;}).sort(function(a,b){return b.start-a.start;});
+  }
   function filtered(){
     var q=$('q').value.toLowerCase(), hb=$('hideBots').checked;
-    return data.filter(function(v){ if(hb&&v.bot) return false; if(!q) return true;
-      return [v.ip,v.city,v.region,v.country,v.device,v.browser,v.os,v.ref,v.tag,v.page,v.ua].join(' ').toLowerCase().indexOf(q)>-1;});
+    return sessions().filter(function(s){var v=s.first; if(hb&&v.bot) return false; if(!q) return true;
+      return s.events.map(function(e){return [e.ip,e.city,e.region,e.country,e.device,e.browser,e.os,e.ref,e.tag,e.page,e.ua,e.label,e.href,e.section].join(' ');}).join(' ').toLowerCase().indexOf(q)>-1;});
   }
+  function evText(e){
+    if(e.type==='section') return 'Viewed <b>'+esc(e.section||e.label)+'</b> section';
+    if(e.type==='click') return 'Clicked <b>&ldquo;'+esc(e.label||'(icon)')+'&rdquo;</b>'+(e.section?' <span class="act">in '+esc(e.section)+'</span>':'')+(e.href?' <span class="hrefc">&rarr; '+esc(e.href)+'</span>':'');
+    return 'Opened the site'+(e.ref?' from <b>'+esc(host(e.ref))+'</b>':' directly')+(e.tag?' (tag: '+esc(e.tag)+')':'');
+  }
+  var openRows={};
   function render(){
-    var list=filtered(), day=Date.now()-864e5;
+    var list=filtered(), day=Date.now()-864e5, firsts=list.map(function(s){return s.first;});
+    var allClicks=[],allSecs=[];list.forEach(function(s){s.clicks.forEach(function(c){allClicks.push(c.label||'(icon)');});s.secs.forEach(function(c){allSecs.push(c.section);});});
     $('cVisits').textContent=list.length;
-    $('cIps').textContent=new Set(list.map(function(v){return v.ip;})).size;
-    $('cMobile').textContent=list.length?Math.round(100*list.filter(function(v){return v.device!=='Desktop';}).length/list.length)+'%':'0%';
-    $('c24').textContent=list.filter(function(v){return v.t>=day;}).length;
-    $('cCountries').innerHTML=top(list.map(function(v){return v.country||'Unknown';}),4);
-    $('cRefs').innerHTML=top(list.map(function(v){return host(v.ref);}),4);
-    $('rows').innerHTML=list.map(function(v){
-      return '<tr><td>'+esc(new Date(v.t).toLocaleString())+'</td><td class="mono">'+esc(v.ip)+'</td><td>'+esc([v.city,v.region,v.country].filter(Boolean).join(', '))+'</td>'
+    $('cIps').textContent=new Set(firsts.map(function(v){return v.ip;})).size;
+    $('cMobile').textContent=list.length?Math.round(100*firsts.filter(function(v){return v.device!=='Desktop';}).length/list.length)+'%':'0%';
+    $('c24').textContent=list.filter(function(s){return s.start>=day;}).length;
+    $('cCountries').innerHTML=top(firsts.map(function(v){return v.country||'Unknown';}),4);
+    $('cRefs').innerHTML=top(firsts.map(function(v){return host(v.ref);}),4);
+    $('cClicks').innerHTML=top(allClicks,5);
+    $('cSecs').innerHTML=top(allSecs,5);
+    $('rows').innerHTML=list.map(function(s){
+      var v=s.first, open=openRows[s.id];
+      var row='<tr class="sess'+(open?' open':'')+'" data-id="'+esc(s.id)+'"><td>'+esc(new Date(s.start).toLocaleString())+'</td><td class="mono">'+esc(v.ip)+'</td><td>'+esc([v.city,v.region,v.country].filter(Boolean).join(', '))+'</td>'
       +'<td><span class="pill'+(v.bot?' bot':'')+'">'+esc(v.bot?'Bot':v.device)+'</span></td><td>'+esc(v.browser+' · '+v.os)+'</td>'
-      +'<td>'+esc(host(v.ref))+'</td><td>'+esc(v.tag)+'</td><td>'+esc(v.page)+'</td><td class="mono">'+esc([v.screen,v.lang,v.tz].filter(Boolean).join(' · '))+'</td><td class="ua">'+esc(v.ua)+'</td></tr>';
+      +'<td>'+esc(host(v.ref))+'</td><td>'+esc(v.tag)+'</td><td class="act"><b>'+s.clicks.length+'</b> clicks · <b>'+s.secs.length+'</b> sections</td>'
+      +'<td class="mono">'+esc([v.screen,v.lang,v.tz].filter(Boolean).join(' · '))+'</td><td class="ua">'+esc(v.ua)+'</td></tr>';
+      if(open) row+='<tr class="detail"><td colspan="10"><ul class="tl">'+s.events.map(function(e){
+        return '<li class="'+esc(e.type||'view')+'"><span class="tm">'+esc(new Date(e.t).toLocaleTimeString())+'</span>'+evText(e)+'</li>';}).join('')+'</ul></td></tr>';
+      return row;
     }).join('')||'<tr><td colspan="10" style="color:var(--muted)">No visits yet.</td></tr>';
   }
+  $('rows').addEventListener('click',function(e){var tr=e.target.closest('tr.sess');if(!tr)return;var id=tr.getAttribute('data-id');openRows[id]=!openRows[id];render();});
   function csv(){
-    var cols=['time','ip','city','region','country','device','browser','os','bot','source','tag','page','screen','lang','tz','user_agent'];
-    var lines=[cols.join(',')].concat(filtered().map(function(v){
-      return [new Date(v.t).toISOString(),v.ip,v.city,v.region,v.country,v.device,v.browser,v.os,v.bot,v.ref,v.tag,v.page,v.screen,v.lang,v.tz,v.ua]
+    var cols=['time','session','type','label','section','href','ip','city','region','country','device','browser','os','bot','source','tag','page','screen','lang','tz','user_agent'];
+    var rows=[];filtered().forEach(function(s){s.events.forEach(function(v){rows.push(v);});});
+    var lines=[cols.join(',')].concat(rows.map(function(v){
+      return [new Date(v.t).toISOString(),v.sid,v.type||'view',v.label,v.section,v.href,v.ip,v.city,v.region,v.country,v.device,v.browser,v.os,v.bot,v.ref,v.tag,v.page,v.screen,v.lang,v.tz,v.ua]
         .map(function(x){return '"'+String(x==null?'':x).replace(/"/g,'""')+'"';}).join(',');}));
     var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='visitor-logs.csv';a.click();
   }
