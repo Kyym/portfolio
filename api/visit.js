@@ -1,7 +1,7 @@
-// POST /api/visit  — records one page visit
+// POST /api/visit  — records a page view, a click, or a section view
 const { pipeline } = require('./_redis');
 const KEY = 'visits';
-const MAX = 5000;                      // keep at most 5,000 records
+const MAX = 20000;                     // keep at most 20,000 events
 const MAX_AGE = 90 * 24 * 3600 * 1000; // and nothing older than 90 days
 
 function parseUA(ua) {
@@ -31,6 +31,11 @@ module.exports = async (req, res) => {
       region: h['x-vercel-ip-country-region'] || '',
       city: decodeURIComponent(h['x-vercel-ip-city'] || ''),
       ua, ...parseUA(ua),
+      type: ['view', 'click', 'section'].includes(body.type) ? body.type : 'view',
+      sid: clip(body.sid, 40),
+      label: clip(body.label, 120),
+      href: clip(body.href, 300),
+      section: clip(body.section, 40),
       page: clip(body.page, 200),
       ref: clip(body.ref, 300),
       tag: clip(body.tag, 60),
