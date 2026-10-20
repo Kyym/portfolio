@@ -100,7 +100,7 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
 .header .profile-img img{animation:ringPulse 4s ease-in-out infinite}
 @keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(20,157,221,.0)}50%{box-shadow:0 0 0 6px rgba(20,157,221,.18)}}
 
-.privacy-note{max-width:760px;margin:14px auto 0;text-align:center;font-size:12px;color:color-mix(in srgb,var(--default-color),transparent 40%)}
+.footer .privacy-link{color:color-mix(in srgb,var(--default-color),transparent 35%);text-decoration:none}.footer .privacy-link:hover{color:var(--accent-color)}.footer .footer-sep{opacity:.5;margin:0 4px}#privacyModal .modal-content{background:var(--surface-color);color:var(--default-color);border:1px solid color-mix(in srgb,var(--default-color),transparent 85%)}#privacyModal .modal-header{border-bottom-color:color-mix(in srgb,var(--default-color),transparent 85%)}#privacyModal .modal-title{font-size:18px}#privacyModal .modal-body{font-size:14px;line-height:1.6}html[data-theme="dark"] #privacyModal .btn-close{filter:invert(1)}
 @media (prefers-reduced-motion:reduce){#bgCanvas,.hero .scanline{display:none}.hero::after{animation:none}}
 
 /* ===== Kevin customisations ===== */
@@ -698,15 +698,25 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
   <footer id="footer" class="footer position-relative">
     <div class="container">
       <div class="copyright text-center">
-        <p>© <span>2026</span> <strong class="px-1 sitename">Kevin Kimani Mwaura</strong> <span>All Rights Reserved</span></p>
+        <p>© <span>2026</span> <strong class="px-1 sitename">Kevin Kimani Mwaura</strong> <span class="footer-sep">·</span> <a href="#" class="privacy-link" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy</a></p>
       </div>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact (BootstrapMade free licence). -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a>
-      </div>
-      <p class="privacy-note" id="privacy"><i class="bi bi-shield-lock"></i> Privacy: this site records each visit's IP address, approximate location (city/country), device, browser, referring site, and which sections are viewed and links clicked, to understand how the portfolio is used. Records are kept for up to 90 days and are not shared or sold. To have your data removed, email <a href="mailto:kevinkimani165@gmail.com">kevinkimani165@gmail.com</a>.</p>
     </div>
   </footer>
+
+  <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="privacyModalLabel"><i class="bi bi-shield-lock"></i> Privacy</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>This site records each visit's IP address, approximate location (city/country), device, browser, referring site, and which sections are viewed and links clicked, to understand how the portfolio is used.</p>
+          <p class="mb-0">Records are kept for up to 90 days and are not shared or sold. To have your data removed, email <a href="mailto:kevinkimani165@gmail.com">kevinkimani165@gmail.com</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to light mode" title="Toggle light / dark mode"><i class="bi bi-sun"></i></button>
 
