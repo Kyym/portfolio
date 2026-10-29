@@ -156,7 +156,23 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
 :focus-visible{outline:2px solid var(--accent-color);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}[data-aos]{opacity:1!important;transform:none!important}}
 
-  </style>
+  
+/* CV chooser */
+#cvModal .modal-content{background:var(--surface-color);color:var(--default-color);border:1px solid color-mix(in srgb,var(--default-color),transparent 85%);border-radius:14px}
+#cvModal .modal-header{border-bottom-color:color-mix(in srgb,var(--default-color),transparent 88%)}
+#cvModal .modal-title{font-size:18px;display:flex;gap:8px;align-items:center}
+#cvModal .modal-title i{color:var(--accent-color)}
+html[data-theme="dark"] #cvModal .btn-close{filter:invert(1)}
+.cv-option{display:flex;gap:14px;padding:14px;border:1px solid color-mix(in srgb,var(--default-color),transparent 85%);border-radius:12px;margin-bottom:12px}
+.cv-option:last-child{margin-bottom:0}
+.cv-option__icon{width:44px;height:44px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--accent-color),transparent 88%);color:var(--accent-color);font-size:20px}
+.cv-option h6{margin:0 0 4px;font-weight:700;font-size:15px;color:var(--heading-color)}
+.cv-option p{margin:0 0 10px;font-size:13.5px;color:color-mix(in srgb,var(--default-color),transparent 25%)}
+.cv-option__actions{display:flex;gap:8px;flex-wrap:wrap}
+.cv-dl,.cv-view{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border-radius:50px;font-size:13.5px;font-family:var(--nav-font)}
+.cv-dl{background:var(--accent-color);color:#fff}.cv-dl:hover{color:#fff;filter:brightness(1.1)}
+.cv-view{border:1px solid color-mix(in srgb,var(--default-color),transparent 75%);color:var(--default-color)}.cv-view:hover{border-color:var(--accent-color);color:var(--accent-color)}
+</style>
   <!-- Template: iPortfolio by BootstrapMade (https://bootstrapmade.com/license/), distributed by ThemeWagon -->
 </head>
 
@@ -182,7 +198,7 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
       <a href="https://www.instagram.com/kyym_kev?igsh=MWh1MzBrd3NkanRzaQ==" target="_blank" rel="noopener" class="instagram" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
     </div>
 
-    <a href="Kevin_Mwaura_CV.pdf" download="Kevin_Kimani_Mwaura_CV.pdf" class="cv-btn"><i class="bi bi-download"></i> Download CV</a>
+    <a href="Kevin_Mwaura_CV.pdf" class="cv-btn" data-bs-toggle="modal" data-bs-target="#cvModal"><i class="bi bi-download"></i> Download CV</a>
 
     <nav id="navmenu" class="navmenu">
       <ul>
@@ -210,7 +226,7 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
         <p class="hero-sub">7+ years building web platforms, mobile apps, HR &amp; recruitment systems, ERP integrations and AI-powered tools. Currently at CCI Global.</p>
         <div class="hero-btns">
           <a href="#portfolio" class="btn-primary-k">View Projects</a>
-          <a href="Kevin_Mwaura_CV.pdf" download="Kevin_Kimani_Mwaura_CV.pdf" class="btn-outline-k"><i class="bi bi-download"></i> Download CV</a>
+          <a href="Kevin_Mwaura_CV.pdf" class="btn-outline-k" data-bs-toggle="modal" data-bs-target="#cvModal"><i class="bi bi-download"></i> Download CV</a>
         </div>
       </div>
     </section>
@@ -329,7 +345,7 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
     <section id="resume" class="resume section">
       <div class="container section-title" data-aos="fade-up">
         <h2>Resume</h2>
-        <p>Progressive experience across software engineering, AI, fintech and HR tech. <a href="Kevin_Mwaura_CV.pdf" target="_blank" rel="noopener">View the full CV (PDF) <i class="bi bi-box-arrow-up-right"></i></a></p>
+        <p>Progressive experience across software engineering, AI, fintech and HR tech. <a href="Kevin_Mwaura_CV.pdf" data-bs-toggle="modal" data-bs-target="#cvModal">View or download my CV (PDF) <i class="bi bi-box-arrow-up-right"></i></a></p>
       </div>
       <div class="container">
         <div class="row">
@@ -689,7 +705,7 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
                 <a href="https://wa.me/254727596922?text=Hi%20Kevin%2C%20I%20found%20your%20portfolio%20and%20would%20like%20to%20connect!" target="_blank" rel="noopener" class="wa"><i class="bi bi-whatsapp"></i> WhatsApp</a>
                 <a href="https://www.linkedin.com/in/kevin-k-257b52171/" target="_blank" rel="noopener"><i class="bi bi-linkedin"></i> LinkedIn</a>
                 <a href="https://github.com/Kyym" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
-                <a href="Kevin_Mwaura_CV.pdf" download="Kevin_Kimani_Mwaura_CV.pdf"><i class="bi bi-file-earmark-pdf"></i> CV (PDF)</a>
+                <a href="Kevin_Mwaura_CV.pdf" data-bs-toggle="modal" data-bs-target="#cvModal"><i class="bi bi-file-earmark-pdf"></i> CV (PDF)</a>
               </div>
             </div>
           </div>
@@ -766,6 +782,41 @@ html[data-theme="dark"] .main .section:not(.hero){animation:gridPan 40s linear i
 
   <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to light mode" title="Toggle light / dark mode"><i class="bi bi-sun"></i></button>
 
+
+  <div class="modal fade" id="cvModal" tabindex="-1" aria-labelledby="cvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cvModalLabel"><i class="bi bi-file-earmark-person"></i> Choose a CV</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="cv-option">
+              <div class="cv-option__icon"><i class="bi bi-code-slash"></i></div>
+              <div class="cv-option__body">
+                <h6>Full Stack Developer</h6>
+                <p>Software engineering across web, mobile, ERP and AI: full experience and projects.</p>
+                <div class="cv-option__actions">
+                  <a href="Kevin_Mwaura_CV.pdf" download="Kevin_Mwaura_Full_Stack_Developer_CV.pdf" class="cv-dl"><i class="bi bi-download"></i> Download</a>
+                  <a href="Kevin_Mwaura_CV.pdf" target="_blank" rel="noopener" class="cv-view"><i class="bi bi-eye"></i> View</a>
+                </div>
+              </div>
+            </div>
+            <div class="cv-option">
+              <div class="cv-option__icon"><i class="bi bi-diagram-3"></i></div>
+              <div class="cv-option__body">
+                <h6>Technology, Software &amp; Systems Lead</h6>
+                <p>Architecture, integrations, vendor and delivery leadership, and client systems.</p>
+                <div class="cv-option__actions">
+                  <a href="Kevin_Mwaura_Technology_Systems_Lead_CV.pdf" download="Kevin_Mwaura_Technology_Systems_Lead_CV.pdf" class="cv-dl"><i class="bi bi-download"></i> Download</a>
+                  <a href="Kevin_Mwaura_Technology_Systems_Lead_CV.pdf" target="_blank" rel="noopener" class="cv-view"><i class="bi bi-eye"></i> View</a>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center" aria-label="Back to top"><i class="bi bi-arrow-up-short"></i></a>
   <div id="preloader"></div>
 
